@@ -15,14 +15,15 @@ export default class {
     });
   }
 
-  async findById(key: string, id: string) {
+  async findById<T>(key: string, id: string): Promise<T | null> {
     const field = "id";
 
     const filter = `$[?(@.${field}=='${id}')]`;
 
-    const idResult: any[] = await this.redis.json.get(key, filter);
+    const result: any[] = await this.redis.json.get(key, filter);
 
-    if (idResult.length > 0) return idResult[0];
+    if (result.length === 0) return null;
+    return result[0];
   }
 
   private getFilter(field: string, value: string | number) {
@@ -30,26 +31,38 @@ export default class {
     return `$[?(@.${field}==${valueString})]`;
   }
 
-  async findByField(key: string, field: string, value: string | number) {
-    const idResult = await this.redis.json.get(
+  async findByField<T>(
+    key: string,
+    field: string,
+    value: string | number
+  ): Promise<T | null> {
+    const result = await this.redis.json.get(key, this.getFilter(field, value));
+    if (result.length === 0) return null;
+    return result[0];
+  }
+
+  async findAllByField<T>(
+    key: string,
+    field: string,
+    value: string | number
+  ): Promise<T[]> {
+    const result: T[][] = await this.redis.json.get(
       key,
       this.getFilter(field, value)
     );
-    if (idResult.length > 0) return idResult[0];
+
+    if (!result) return [];
+    return result[0];
   }
 
-  async findAllByField(key: string, field: string, value: string | number) {
-    const result = await this.redis.json.get(key, this.getFilter(field, value));
-    return result && result.length > 0 ? result[0] : [];
+  async findAll<T>(key: string): Promise<T[]> {
+    const result: T[][] = await this.redis.json.get(key, "$");
+
+    if (!result) return [];
+    return result[0];
   }
 
-  async findAll(key: string) {
-    const result = await this.redis.json.get(key, "$");
-
-    return result && result.length > 0 ? result[0] : [];
-  }
-
-  async create(key: string, value: any, id?: string) {
+  async create<T>(key: string, value: any, id?: string): Promise<T> {
     const keyExists = await this.redis.exists(key);
     if (!keyExists) {
       await this.redis.json.set(key, "$", []);
@@ -62,7 +75,7 @@ export default class {
     return value;
   }
 
-  async createMany(key: string, values: any[]) {
+  async createMany<T>(key: string, values: any[]): Promise<T[]> {
     const keyExists = await this.redis.exists(key);
     if (!keyExists) {
       await this.redis.json.set(key, "$", []);
@@ -77,17 +90,16 @@ export default class {
     return values;
   }
 
-  async update(key: string, id: string, value: any) {
+  async update<T>(key: string, id: string, value: Partial<T>): Promise<T> {
     const filter = this.getFilter("id", id);
-    console.log("filter", filter);
 
-    const current = await this.findById(key, id);
+    const current = await this.findById<T>(key, id);
 
-    const newValue = { ...current, ...value };
+    const newValue: Partial<T> = { ...current, ...value };
 
-    const result = await this.redis.json.set(key, filter, newValue);
+    const result = await this.redis.json.set(key, filter, newValue as any);
 
-    return newValue;
+    return newValue as T;
   }
 
   async remove(key: string, id: string) {

@@ -1,14 +1,18 @@
 {
   "name": "@dannywaite/redis-wrapper",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.3",
+  "description": "A simple wrapper around the @upstash/redis package",
+  "license": "MIT",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "test": "jest",
     "pretest": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "redis",
+    "upstash"
+  ],
   "author": "Danny Waite",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -35,6 +39,6 @@
     "@upstash/redis": "^1.20.0",
     "tiny-uid": "^1.1.2"
   },
-  "types": "dist/types/index.d.ts",
-  "typings": "dist/types/index.d.ts"
+  "types": "dist/types/src/index.d.ts",
+  "typings": "dist/types/src/index.d.ts"
 }
