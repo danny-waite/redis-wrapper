@@ -1,4 +1,4 @@
-import { Redis } from "@upstash/redis/with-fetch";
+import { Redis } from "@upstash/redis";
 
 import tuid from "tiny-uid";
 
@@ -22,7 +22,7 @@ export default class {
 
     const result: any[] = await this.redis.json.get(key, filter);
 
-    if (result.length === 0) return null;
+    if (!result || result.length === 0) return null;
     return result[0];
   }
 
@@ -37,7 +37,7 @@ export default class {
     value: string | number
   ): Promise<T | null> {
     const result = await this.redis.json.get(key, this.getFilter(field, value));
-    if (result.length === 0) return null;
+    if (!result || result.length === 0) return null;
     return result[0];
   }
 
