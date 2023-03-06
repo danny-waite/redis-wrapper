@@ -1,6 +1,6 @@
 {
   "name": "@dannywaite/redis-wrapper",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "description": "A simple wrapper around the @upstash/redis package",
   "license": "MIT",
   "scripts": {

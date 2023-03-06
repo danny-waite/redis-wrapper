@@ -46,20 +46,25 @@ export default class {
     field: string,
     value: string | number
   ): Promise<T[]> {
-    const result: T[][] = await this.redis.json.get(
-      key,
-      this.getFilter(field, value)
-    );
+    // TODO: fix this. filter is broken, only returning first item
+    // const result: T[][] = await this.redis.json.get(
+    //   key,
+    //   this.getFilter(field, value)
+    // );
+
+    // return result[0] || [];
+
+    const result: T[][] = await this.redis.json.get(key, "$");
 
     if (!result) return [];
-    return result[0];
+    return result[0].filter((item: any) => item[field] === value) || [];
   }
 
   async findAll<T>(key: string): Promise<T[]> {
     const result: T[][] = await this.redis.json.get(key, "$");
 
     if (!result) return [];
-    return result[0];
+    return result[0] || [];
   }
 
   async create<T>(key: string, value: any, id?: string): Promise<T> {
@@ -85,7 +90,7 @@ export default class {
       if (!value.id) value.id = tuid();
     }
 
-    await this.redis.json.arrappend(key, "$", values);
+    await this.redis.json.arrappend(key, "$", ...values);
 
     return values;
   }
@@ -117,8 +122,10 @@ export default class {
     return item;
   }
 
-  async set(key: string, value: object) {
-    const item: any | null = await this.redis.set(key, JSON.stringify(value));
+  async set(key: string, value: object | string) {
+    const val = typeof value === "object" ? JSON.stringify(value) : value;
+
+    const item: any | null = await this.redis.set(key, val);
     return item;
   }
 
